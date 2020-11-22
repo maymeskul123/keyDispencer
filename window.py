@@ -5,7 +5,6 @@ import os, datetime, getpass
 class Window:
     def __init__(self, master):
         self.master = master
-        #self.pattern_key = '\d\d\d\ \d\d\d\ \d\d\d\ \d\d\d'
         self.master.title('Test for UBISOFT')
         self.master.geometry('600x300+200+100')
         self.choiceCombo = False
@@ -44,19 +43,20 @@ class Window:
         if self.choiceCombo and self.found_key and code !='\n' and code !='':
             file_name = self.combobox.get()
             used_file = self.directory_used + '\\' + file_name + '_used.txt'
-            self.del_line_unused(file_name, self.check_given_away_code(code[:len(code) - 1], used_file), used_file)
+            self.del_line_unused(self.check_given_away_code(code[:len(code) - 1], used_file), used_file)
             self.choiceCombobox('')
 
-    def del_line_unused(self, file_name, add_to_used, used_file):
-        new_f_name = self.directory_unused + '\\' + file_name + '_new.txt'
-        with open(self.get_choice_file(), 'r') as f, open(new_f_name, 'w') as f1:
-            line = f.readline()
+    def del_line_unused(self, add_to_used, used_file):
+        buf = list()
+        with open(self.get_choice_file(), 'r') as f:
             for line_f in f:
-                f1.write(line_f)
+                buf.append(line_f)
         f.close()
-        f1.close()
-        os.remove(self.get_choice_file())
-        os.rename(new_f_name, self.get_choice_file())
+        line = buf[0]
+        del buf[0]
+        file = open(self.get_choice_file(), 'w')
+        file.writelines(buf)
+        file.close()
         if add_to_used:
             self.app_to_used(used_file, self.normalizeLine(line))
 
@@ -64,8 +64,6 @@ class Window:
         time_format = "%Y-%m-%d %H:%M:%S"
         used_f = open(used_file, 'a')
         date = datetime.datetime.today()
-        # if line[len(line) - 1:len(line)] == '\n':
-        #     line = line[:len(line) - 1]
         used_f.writelines(line + '-' + getpass.getuser() + '-' + f"{date:{time_format}}" + '\n')
         used_f.close()
 
